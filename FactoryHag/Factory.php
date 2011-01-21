@@ -2,6 +2,8 @@
 
 namespace FactoryHag;
 
+require_once 'util.php';
+
 class Factory
 {
 	/**
