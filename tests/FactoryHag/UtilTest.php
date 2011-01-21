@@ -88,6 +88,18 @@ class UtilTest extends PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('FactoryHag\Factory', Hag\Broker::getInstance()->factory('foo'));
 	}
 
+	public function testDefineCanBeGivenANullDb()
+	{
+		Bar::setDefaultAdapter($this->db);
+
+		Hag\define('bar', array(
+			'a' => 'one',
+			'b' => 'two',
+		), null);
+
+		$this->assertInstanceOf('FactoryHag\Factory', Hag\Broker::getInstance()->factory('bar'));
+	}
+
 	/*
 	 * FactoryHag\flush()
 	 */

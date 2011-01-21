@@ -38,10 +38,10 @@ function f()
  *
  * @param  string $name
  * @param  array $defaults
- * @param  Zend_Db_Adapter_Abstract $db
+ * @param  Zend_Db_Adapter_Abstract|null $db
  * @return FactoryHag\Factory  The newly created factory.
  */
-function define($name, array $defaults, \Zend_Db_Adapter_Abstract $db)
+function define($name, array $defaults, $db)
 {
 	$broker = Broker::getInstance();
 	$broker->define($name, $defaults, $db);
