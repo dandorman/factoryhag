@@ -1,7 +1,7 @@
 <?php
 
-require_once '_files/Foo.php';
-require_once '_files/Bar.php';
+require_once '_files/Foos.php';
+require_once '_files/Bars.php';
 
 use FactoryHag\Factory as Factory;
 
@@ -17,14 +17,14 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 			'dbname' => ':memory:',
 		));
 
-		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
-		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS foos (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bars (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
-		$this->db->query('DELETE FROM foo');
-		$this->db->query('DELETE FROM bar');
+		$this->db->query('DELETE FROM foos');
+		$this->db->query('DELETE FROM bars');
 	}
 
 	/*
@@ -33,7 +33,7 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 
 	public function testNullCanBeGivenForDb()
 	{
-		Bar::setDefaultAdapter($this->db);
+		Bars::setDefaultAdapter($this->db);
 
 		$factory = new Factory('bar', array(
 			'a' => 'one',
@@ -81,6 +81,19 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('Zend_Db_Table_Row_Abstract', $factory());
 	}
 
+	public function testTableNameIsByDefaultPluralized()
+	{
+		$factory = new Factory('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$foo = $factory->create();
+
+		$this->assertEquals('foos', $foo->getTable()->info('name'));
+	}
+
 	public function testPassingSpecificAttributesToCreateOverridesDefaults()
 	{
 		$factory = new Factory('foo', array(
@@ -110,11 +123,11 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 			$factory->create();
 		}
 
-		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 
 		$factory->flush();
 
-		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 	}
 
 	public function testFlushDoesNotRemoveRowsCreatedOutsideOfFactoryHag()
@@ -128,20 +141,20 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 		$count = 10;
 
 		for ($i = 0; $i < $count; $i++) {
-			$this->db->query("INSERT INTO foo VALUES (NULL, 'four', 'five', 'six')");
+			$this->db->query("INSERT INTO foos VALUES (NULL, 'four', 'five', 'six')");
 			$factory->create();
 		}
 
-		$this->assertEquals($count * 2, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals($count * 2, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 
 		$factory->flush();
 
-		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 	}
 
 	public function testFlushWorksWhenNullHasBeenGivenForDb()
 	{
-		Bar::setDefaultAdapter($this->db);
+		Bars::setDefaultAdapter($this->db);
 
 		$factory = new Factory('bar', array(
 			'a' => 'one',
@@ -154,10 +167,10 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 			$factory->create();
 		}
 
-		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bar'));
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bars'));
 
 		$factory->flush();
 
-		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bar'));
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bars'));
 	}
 }

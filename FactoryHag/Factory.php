@@ -28,7 +28,7 @@ class Factory
 	public function __construct($name, array $defaults, $db)
 	{
 		$this->_defaults = $defaults;
-		$class = ucfirst(preg_replace('/_(.)/e', 'strtoupper(\1)', $name));
+		$class = ucfirst(preg_replace('/_(.)/e', 'strtoupper(\1)', pluralize($name)));
 
 		$this->_table = new $class($db);
 	}

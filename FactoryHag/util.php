@@ -57,3 +57,18 @@ function flush()
 {
 	return Broker::getInstance()->flush();
 }
+
+/**
+ * Pluralize English words.
+ *
+ * @param  string $word
+ * @return string
+ */
+function pluralize($word)
+{
+	if (empty($word)) {
+		return $word;
+	}
+
+	return $word . 's';
+}

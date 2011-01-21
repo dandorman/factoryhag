@@ -1,7 +1,7 @@
 <?php
 
-require_once '_files/Foo.php';
-require_once '_files/Bar.php';
+require_once '_files/Foos.php';
+require_once '_files/Bars.php';
 
 use FactoryHag\Broker as Broker;
 
@@ -17,14 +17,14 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 			'dbname' => ':memory:',
 		));
 
-		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
-		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS foos (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bars (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
-		$this->db->query('DELETE FROM foo');
-		$this->db->query('DELETE FROM bar');
+		$this->db->query('DELETE FROM foos');
+		$this->db->query('DELETE FROM bars');
 		Broker::getInstance()->clear();
 	}
 
@@ -79,7 +79,7 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 	{
 		$broker = Broker::getInstance();
 
-		Bar::setDefaultAdapter($this->db);
+		Bars::setDefaultAdapter($this->db);
 
 		$broker->define('bar', array(
 			'a' => 'one',
@@ -113,11 +113,11 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 			$broker->factory('foo')->create();
 		}
 
-		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 
 		$broker->flush();
 
-		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 	}
 
 	/**

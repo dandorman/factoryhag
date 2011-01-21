@@ -1,7 +1,8 @@
 <?php
 
 require_once ROOT_PATH . '/FactoryHag/util.php';
-require_once '_files/Foo.php';
+require_once '_files/Foos.php';
+require_once '_files/Bars.php';
 
 use FactoryHag as Hag;
 
@@ -17,14 +18,14 @@ class UtilTest extends PHPUnit_Framework_TestCase
 			'dbname' => ':memory:',
 		));
 
-		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
-		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS foos (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bars (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
-		$this->db->query('DELETE FROM foo');
-		$this->db->query('DELETE FROM bar');
+		$this->db->query('DELETE FROM foos');
+		$this->db->query('DELETE FROM bars');
 		Hag\Broker::getInstance()->clear();
 	}
 
@@ -90,7 +91,7 @@ class UtilTest extends PHPUnit_Framework_TestCase
 
 	public function testDefineCanBeGivenANullDb()
 	{
-		Bar::setDefaultAdapter($this->db);
+		Bars::setDefaultAdapter($this->db);
 
 		Hag\define('bar', array(
 			'a' => 'one',
@@ -118,10 +119,24 @@ class UtilTest extends PHPUnit_Framework_TestCase
 			Hag\f('foo');
 		}
 
-		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
 
 		Hag\flush();
 
-		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foos'));
+	}
+
+	/*
+	 * FactoryHag\pluralize()
+	 */
+
+	public function testPluralizeAddsAnSToEndByDefault()
+	{
+		$this->assertEquals('words', Hag\pluralize('word'));
+	}
+
+	public function testPluralizeReturnsEmptyStringWhenGivenEmptyString()
+	{
+		$this->assertEquals('', Hag\pluralize(''));
 	}
 }
