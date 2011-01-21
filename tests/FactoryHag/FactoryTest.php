@@ -79,4 +79,47 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('holmes', $foo->baz);
 		$this->assertEquals('three', $foo->qux);
 	}
+
+	public function testFlushClearsTheCreatedRows()
+	{
+		$factory = new Factory('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$count = 10;
+
+		for ($i = 0; $i < $count; $i++) {
+			$factory->create();
+		}
+
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+
+		$factory->flush();
+
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+	}
+
+	public function testFlushDoesNotRemoveRowsCreatedOutsideOfFactoryHag()
+	{
+		$factory = new Factory('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$count = 10;
+
+		for ($i = 0; $i < $count; $i++) {
+			$this->db->query("INSERT INTO foo VALUES (NULL, 'four', 'five', 'six')");
+			$factory->create();
+		}
+
+		$this->assertEquals($count * 2, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+
+		$factory->flush();
+
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+	}
 }

@@ -60,4 +60,26 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 		$broker = Broker::getInstance();
 		$bar = $broker('bar');
 	}
+
+	public function testFlushClearsCreatedObjectsFromDatabase()
+	{
+		$broker = Broker::getInstance();
+		$broker->define('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$count = 10;
+
+		for ($i = 0; $i < $count; $i++) {
+			$broker->factory('foo')->create();
+		}
+
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+
+		$broker->flush();
+
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+	}
 }

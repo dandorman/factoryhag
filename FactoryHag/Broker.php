@@ -73,4 +73,17 @@ class Broker
 	{
 		return $this->factory($factory);
 	}
+
+	/**
+	 * Clear all factory-created items from the database.
+	 *
+	 * @return Broker $this
+	 */
+	public function flush()
+	{
+		foreach ($this->_factories as $factory) {
+			$factory->flush();
+		}
+		return $this;
+	}
 }
