@@ -73,6 +73,7 @@ class UtilTest extends PHPUnit_Framework_TestCase
 	/*
 	 * FactoryHag\define()
 	 */
+
 	public function testDefineIsAShortcutForBrokerDefine()
 	{
 		Hag\define('foo', array(
@@ -82,5 +83,30 @@ class UtilTest extends PHPUnit_Framework_TestCase
 		), $this->db);
 
 		$this->assertInstanceOf('FactoryHag\Factory', Hag\Broker::getInstance()->factory('foo'));
+	}
+
+	/*
+	 * FactoryHag\flush()
+	 */
+
+	public function testFlushIsAShortcutForBrokerFlush()
+	{
+		Hag\define('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$count = 10;
+
+		for ($i = 0; $i < $count; $i++) {
+			Hag\f('foo');
+		}
+
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+
+		Hag\flush();
+
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
 	}
 }

@@ -47,3 +47,13 @@ function define($name, array $defaults, \Zend_Db_Adapter_Abstract $db)
 	$broker->define($name, $defaults, $db);
 	return $broker->factory($name);
 }
+
+/**
+ * Shortcut for @see FactoryHag\Broker#flush.
+ *
+ * @return FactoryHag\Broker
+ */
+function flush()
+{
+	return Broker::getInstance()->flush();
+}
