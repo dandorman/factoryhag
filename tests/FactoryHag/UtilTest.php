@@ -25,6 +25,7 @@ class UtilTest extends PHPUnit_Framework_TestCase
 	{
 		$this->db->query('DELETE FROM foo');
 		$this->db->query('DELETE FROM bar');
+		Hag\Broker::getInstance()->clear();
 	}
 
 	/*

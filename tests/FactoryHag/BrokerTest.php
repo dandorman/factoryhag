@@ -25,6 +25,7 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 	{
 		$this->db->query('DELETE FROM foo');
 		$this->db->query('DELETE FROM bar');
+		Broker::getInstance()->clear();
 	}
 
 	/*
@@ -41,6 +42,25 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 		), $this->db);
 
 		$this->assertInstanceOf('FactoryHag\Factory', $broker->factory('foo'));
+	}
+
+	/**
+	 * @expectedException FactoryHag\Exception
+	 */
+	public function testCannotDefineTwoFactoriesWithSameName()
+	{
+		$broker = Broker::getInstance();
+		$broker->define('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$broker->define('foo', array(
+			'bar' => 'four',
+			'baz' => 'five',
+			'qux' => 'six',
+		), $this->db);
 	}
 
 	public function testInvokeIsAShortcutForFactory()
@@ -98,5 +118,22 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 		$broker->flush();
 
 		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+	}
+
+	/**
+	 * @expectedException FactoryHag\Exception
+	 */
+	public function testClearResetsSingleton()
+	{
+		$broker = Broker::getInstance();
+		$broker->define('foo', array(
+			'bar' => 'one',
+			'baz' => 'two',
+			'qux' => 'three',
+		), $this->db);
+
+		$broker->clear();
+
+		$broker->factory('foo');
 	}
 }

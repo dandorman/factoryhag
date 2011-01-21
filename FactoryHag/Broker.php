@@ -91,4 +91,15 @@ class Broker
 		}
 		return $this;
 	}
+
+	/**
+	 * Remove all factories, resetting the instance.
+	 *
+	 * @return Broker $this
+	 */
+	public function clear()
+	{
+		$this->_factories = array();
+		return $this;
+	}
 }
