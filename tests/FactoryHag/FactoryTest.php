@@ -1,6 +1,7 @@
 <?php
 
 require_once '_files/Foo.php';
+require_once '_files/Bar.php';
 
 use FactoryHag\Factory as Factory;
 
@@ -17,16 +18,31 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 		));
 
 		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
 		$this->db->query('DELETE FROM foo');
+		$this->db->query('DELETE FROM bar');
 	}
 
 	/*
 	 * tests
 	 */
+
+	public function testNullCanBeGivenForDb()
+	{
+		Bar::setDefaultAdapter($this->db);
+
+		$factory = new Factory('bar', array(
+			'a' => 'one',
+			'b' => 'two',
+		), null);
+
+		$bar = $factory->create();
+		$this->assertInstanceOf('Zend_Db_Table_Row_Abstract', $bar);
+	}
 
 	public function testCreateReturnsATableRowObject()
 	{
@@ -121,5 +137,27 @@ class FactoryTest extends PHPUnit_Framework_TestCase
 		$factory->flush();
 
 		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM foo'));
+	}
+
+	public function testFlushWorksWhenNullHasBeenGivenForDb()
+	{
+		Bar::setDefaultAdapter($this->db);
+
+		$factory = new Factory('bar', array(
+			'a' => 'one',
+			'b' => 'two',
+		), null);
+
+		$count = 10;
+
+		for ($i = 0; $i < $count; $i++) {
+			$factory->create();
+		}
+
+		$this->assertEquals($count, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bar'));
+
+		$factory->flush();
+
+		$this->assertEquals(0, (int) $this->db->fetchOne('SELECT COUNT(*) FROM bar'));
 	}
 }

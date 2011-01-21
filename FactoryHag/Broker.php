@@ -40,12 +40,17 @@ class Broker
 	 *
 	 * @param  string $name
 	 * @param  array $defaults
-	 * @param  Zend_Db_Adapter_Abstract $db
+	 * @param  Zend_Db_Adapter_Abstract|null $db
 	 * @return FactoryHag $this
 	 */
-	public function define($name, array $defaults, \Zend_Db_Adapter_Abstract $db)
+	public function define($name, array $defaults, $db)
 	{
+		if (array_key_exists($name, $this->_factories)) {
+			throw new Exception("There is already a factory defined with name '$name'");
+		}
+
 		$this->_factories[$name] = new Factory($name, $defaults, $db);
+		return $this;
 	}
 
 	/**

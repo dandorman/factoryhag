@@ -18,11 +18,13 @@ class UtilTest extends PHPUnit_Framework_TestCase
 		));
 
 		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
 		$this->db->query('DELETE FROM foo');
+		$this->db->query('DELETE FROM bar');
 	}
 
 	/*

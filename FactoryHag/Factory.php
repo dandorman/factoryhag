@@ -5,14 +5,9 @@ namespace FactoryHag;
 class Factory
 {
 	/**
-	 * @var Zend_Db_Adapter_Abstract
+	 * @var Zend_Db_Table_Abstract
 	 */
-	protected $_db;
-
-	/**
-	 * @var string
-	 */
-	protected $_tableClass;
+	protected $_table;
 
 	/**
 	 * @var array
@@ -25,13 +20,17 @@ class Factory
 	protected $_createdPrimaryKeys = array();
 
 	/**
+	 * @param  string $name
+	 * @param  array $defaults
+	 * @param  Zend_Db_Adapter_Abstract|null $db
 	 * @return FactoryHag\Factory
 	 */
-	public function __construct($name, array $defaults, \Zend_Db_Adapter_Abstract $db)
+	public function __construct($name, array $defaults, $db)
 	{
-		$this->_db = $db;
 		$this->_defaults = $defaults;
-		$this->_tableClass = ucfirst(preg_replace('/_(.)/e', 'strtoupper(\1)', $name));
+		$class = ucfirst(preg_replace('/_(.)/e', 'strtoupper(\1)', $name));
+
+		$this->_table = new $class($db);
 	}
 
 	/**
@@ -42,14 +41,12 @@ class Factory
 	 */
 	public function create(array $attributes = array())
 	{
-		$table = new $this->_tableClass($this->_db);
-
 		$data = $this->_defaults;
 		foreach ($attributes as $attr => $value) {
 			$data[$attr] = $value;
 		}
 
-		$row = $table->createRow($data);
+		$row = $this->_table->createRow($data);
 		$this->_createdPrimaryKeys []= $row->save();
 		return $row;
 	}
@@ -73,10 +70,11 @@ class Factory
 	public function flush()
 	{
 		if ($this->_createdPrimaryKeys) {
-			$table = new $this->_tableClass($this->_db);
-			$primary = current($table->info('primary'));
-			$table->delete(
-				$this->_db->quoteInto(
+			$primary = current($this->_table->info('primary'));
+			$db = $this->_table->getAdapter();
+
+			$this->_table->delete(
+				$db->quoteInto(
 					"$primary IN (?)",
 					$this->_createdPrimaryKeys
 				)

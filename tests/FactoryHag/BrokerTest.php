@@ -1,6 +1,7 @@
 <?php
 
 require_once '_files/Foo.php';
+require_once '_files/Bar.php';
 
 use FactoryHag\Broker as Broker;
 
@@ -17,11 +18,13 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 		));
 
 		$this->db->query('CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY AUTOINCREMENT, bar TEXT, baz TEXT, qux TEXT)');
+		$this->db->query('CREATE TABLE IF NOT EXISTS bar (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)');
 	}
 
 	public function tearDown()
 	{
 		$this->db->query('DELETE FROM foo');
+		$this->db->query('DELETE FROM bar');
 	}
 
 	/*
@@ -52,13 +55,27 @@ class BrokerTest extends PHPUnit_Framework_TestCase
 		$this->assertInstanceOf('FactoryHag\Factory', $broker('foo'));
 	}
 
+	public function testNullCanBePassedForDb()
+	{
+		$broker = Broker::getInstance();
+
+		Bar::setDefaultAdapter($this->db);
+
+		$broker->define('bar', array(
+			'a' => 'one',
+			'b' => 'two',
+		), null);
+
+		$this->assertInstanceOf('FactoryHag\Factory', $broker('bar'));
+	}
+
 	/**
 	 * @expectedException FactoryHag\Exception
 	 */
 	public function testRetrievingANonDefinedFactoryThrowsAnException()
 	{
 		$broker = Broker::getInstance();
-		$bar = $broker('bar');
+		$broker('unknown');
 	}
 
 	public function testFlushClearsCreatedObjectsFromDatabase()
